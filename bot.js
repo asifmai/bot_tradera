@@ -2,6 +2,7 @@ const fs = require('fs');
 const pupHelper = require('./puppeteerhelper');
 const { categories } = require('./keys');
 let productsLinks = [];
+// productsLinks = JSON.parse(fs.readFileSync('productsLinks.json', 'utf-8'));
 let products = [];
 
 const run = async () => {
@@ -9,6 +10,8 @@ const run = async () => {
     await pupHelper.launchBrowser();
 
     await fetchAllProductsLinks();
+
+    // await fetchProducts();
 
     await pupHelper.closeBrowser();
   } catch (error) {
@@ -21,7 +24,7 @@ const fetchAllProductsLinks = () =>
   new Promise(async (resolve, reject) => {
     try {
       for (let i = 0; i < categories.length; i++) {
-        console.log(`${i + 1}/${categories.length} - Fetching links from category`);
+        console.log(`${i + 1}/${categories.length} - Fetching links from category [${url}]`);
         await fetchProductsLinks(categories[i]);
       }
 
@@ -59,8 +62,14 @@ const fetchProductsLinks = (url) =>
         await acceptPrivacy(page);
         console.log(`Fetching links from page ${pageNumber}/${numberOfPages}`);
         await pupHelper.autoScroll(page);
-        await page.waitForSelector('.search-results > .row > .item-card-container a.item-card-image');
-        const pageLinks = await page.$$eval('.search-results > .row > .item-card-container a.item-card-image', (elms) => elms.map((elm) => elm.href));
+        await page.waitForSelector('.item-card-container a.item-card-image');
+        const searchResult = await page$('.search-results');
+        let pageLinks = [];
+        if (searchResult) {
+          pageLinks = await page.$$eval('.search-results > .row > .item-card-container a.item-card-image', (elms) => elms.map((elm) => elm.href));
+        } else {
+          pageLinks = await page.$$eval('.few-results > .row > .item-card-container a.item-card-image', (elms) => elms.map((elm) => elm.href));
+        }
         categoryLinks.push(...pageLinks);
 
         nextButton = await page.$('ul.pagination > .page-item:last-child > a:not(.disabled)');
@@ -104,7 +113,7 @@ const fetchProducts = () =>
   new Promise(async (resolve, reject) => {
     try {
       for (let i = 0; i < productsLinks.length; i++) {
-        // await fetchProduct(productsLinks[i]);
+        await fetchProductSingle(i);
       }
 
       resolve(true);
@@ -114,4 +123,18 @@ const fetchProducts = () =>
     }
   });
 
+const fetchProductSingle = (prodIdx) =>
+  new Promise(async (resolve, reject) => {
+    let page;
+    try {
+      page = await pupHelper.launchPage(browser);
+
+      await page.close();
+      resolve(true);
+    } catch (error) {
+      if (page) await page.close();
+      console.log('fetchProductSingle Error: ', error);
+      reject(error);
+    }
+  });
 run();
