@@ -62,7 +62,6 @@ const fetchProductsLinks = (url) =>
         await acceptPrivacy(page);
         console.log(`Fetching links from page ${pageNumber}/${numberOfPages}`);
         await pupHelper.autoScroll(page);
-        await page.waitForSelector('.item-card-container a.item-card-image');
         const searchResult = await page.$('.search-results');
         let pageLinks = [];
         if (searchResult) {
