@@ -24,7 +24,7 @@ const fetchAllProductsLinks = () =>
   new Promise(async (resolve, reject) => {
     try {
       for (let i = 0; i < categories.length; i++) {
-        console.log(`${i + 1}/${categories.length} - Fetching links from category [${url}]`);
+        console.log(`${i + 1}/${categories.length} - Fetching links from category [${categories[i]}]`);
         await fetchProductsLinks(categories[i]);
       }
 
