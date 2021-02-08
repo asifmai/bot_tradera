@@ -63,7 +63,7 @@ const fetchProductsLinks = (url) =>
         console.log(`Fetching links from page ${pageNumber}/${numberOfPages}`);
         await pupHelper.autoScroll(page);
         await page.waitForSelector('.item-card-container a.item-card-image');
-        const searchResult = await page$('.search-results');
+        const searchResult = await page.$('.search-results');
         let pageLinks = [];
         if (searchResult) {
           pageLinks = await page.$$eval('.search-results > .row > .item-card-container a.item-card-image', (elms) => elms.map((elm) => elm.href));
